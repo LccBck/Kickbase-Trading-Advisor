@@ -84,9 +84,6 @@ def get_league_players_on_market(token, league_id):
 
     return result
 
-
-
-return ranked
 def get_league_ranking(token, league_id):
     """Get the overall league ranking."""
     url = f"{BASE_URL}/leagues/{league_id}/ranking"
