@@ -1,4 +1,5 @@
 from kickbase_api.config import BASE_URL, get_json_with_token
+import logging
 
 # All functions related to league data
 
@@ -89,9 +90,27 @@ def get_league_ranking(token, league_id):
     url = f"{BASE_URL}/leagues/{league_id}/ranking"
     data = get_json_with_token(url, token)
 
-    players = [(user["n"], user["sp"]) for user in data["us"]]
+   players = []
+for user in data.get("us", []):
+    name = user.get("n")
+    if name is None:
+        logging.warning("Skipping user without 'n' field: %s", user)
+        continue
 
-    # Sort by score (descending)
-    ranked = sorted(players, key=lambda x: x[1], reverse=True)
+    sp = user.get("sp", None)
+    if sp is None:
+        logging.warning("Missing 'sp' for user %s — defaulting to 0. User: %s", name, user)
+        sp_value = 0
+    else:
+        try:
+            sp_value = int(sp)
+        except (TypeError, ValueError):
+            logging.warning("Invalid 'sp' value for user %s: %r — defaulting to 0", name, sp)
+            sp_value = 0
 
-    return ranked
+    players.append((name, sp_value))
+
+# Sort by score (descending)
+ranked = sorted(players, key=lambda x: x[1], reverse=True)
+
+return ranked
