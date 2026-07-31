@@ -84,33 +84,35 @@ def get_league_players_on_market(token, league_id):
 
     return result
 
+
+
+return ranked
 def get_league_ranking(token, league_id):
     """Get the overall league ranking."""
-    
     url = f"{BASE_URL}/leagues/{league_id}/ranking"
     data = get_json_with_token(url, token)
 
-   players = []
-for user in data.get("us", []):
-    name = user.get("n")
-    if name is None:
-        logging.warning("Skipping user without 'n' field: %s", user)
-        continue
+    players = []
+    for user in data.get("us", []):
+        name = user.get("n")
+        if name is None:
+            logging.warning("Skipping user without 'n' field: %s", user)
+            continue
 
-    sp = user.get("sp", None)
-    if sp is None:
-        logging.warning("Missing 'sp' for user %s — defaulting to 0. User: %s", name, user)
-        sp_value = 0
-    else:
-        try:
-            sp_value = int(sp)
-        except (TypeError, ValueError):
-            logging.warning("Invalid 'sp' value for user %s: %r — defaulting to 0", name, sp)
+        sp = user.get("sp", None)
+        if sp is None:
+            logging.warning("Missing 'sp' for user %s — defaulting to 0. User: %s", name, user)
             sp_value = 0
+        else:
+            try:
+                sp_value = int(sp)
+            except (TypeError, ValueError):
+                logging.warning("Invalid 'sp' value for user %s: %r — defaulting to 0", name, sp)
+                sp_value = 0
 
-    players.append((name, sp_value))
+        players.append((name, sp_value))
 
-# Sort by score (descending)
-ranked = sorted(players, key=lambda x: x[1], reverse=True)
+    # Sort by score (descending)
+    ranked = sorted(players, key=lambda x: x[1], reverse=True)
 
-return ranked
+    return ranked
